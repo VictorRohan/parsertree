@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <ctype.h>
+
+typedef struct TreeNode {
+    char data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
+
+int isOperator(char ch);
+int getPrecedence(char operator);
+
+TreeNode* createNode(char data) {
+    TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+
+TreeNode* parseExpression(char* expression, int start, int end) {
+    if (start > end)
+        return NULL;
+
+    TreeNode* root = NULL;
+    TreeNode* current = NULL;
+    int parenthesesCount = 0;
+    int lowestPrecedence = -1;
+    int lowestPrecedenceIndex = -1;
+    int i;
+    
+    for ( i = start; i <= end; i++) {
+        if (expression[i] == '(') {
+            parenthesesCount++;
+        } else if (expression[i] == ')') {
+            parenthesesCount--;
+        } else if (parenthesesCount == 0 && isOperator(expression[i])) {
+            int precedence = getPrecedence(expression[i]);
+
+            if (lowestPrecedence == -1 || precedence <= lowestPrecedence) {
+                lowestPrecedence = precedence;
+                lowestPrecedenceIndex = i;
+            }
+        }
+    }
+
+    if (lowestPrecedenceIndex != -1) {
+        root = createNode(expression[lowestPrecedenceIndex]);
+        root->left = parseExpression(expression, start, lowestPrecedenceIndex - 1);
+        root->right = parseExpression(expression, lowestPrecedenceIndex + 1, end);
+    } else if (expression[start] == '(' && expression[end] == ')') {
+        root = parseExpression(expression, start + 1, end - 1);
+    } else {
+        int number = 0,i;
+        for (i = start; i <= end; i++) {
+            number = (number * 10) + (expression[i] - '0');
+        }
+        root = createNode(number + '0');
+    }
+
+    return root;
+}
+
+int isOperator(char ch) {
+    return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
+}
+
+int getPrecedence(char operator) {
+    switch (operator) {
+        case '+':
+        case '-':
+            return 1;
+        case '*':
+        case '/':
+            return 2;
+        case '^':
+            return 3;
+        default:
+            return -1;
+    }
+}
+
+void printDiagram(TreeNode* root, int space) {
+    if (root == NULL)
+        return;
+
+    space += 4;
+
+    printDiagram(root->right, space);
+
+    printf("%*c\n", space, root->data);
+
+    printDiagram(root->left, space);
+}
+
+int main() {
+    char expression1[] = "2 + 3 * (5 + 2)";
+    TreeNode* root1 = parseExpression(expression1, 0, strlen(expression1) - 1);
+
+    char expression2[] = "3 * x ^ 2 + cos(2 * x) - 1";
+    TreeNode* root2 = parseExpression(expression2, 0, strlen(expression2) - 1);
+
+    printf("Expression 1 in diagrammatic form:\n");
+    printDiagram(root1, 0);
+    printf("\n");
+
+    printf("Expression 2 in diagrammatic form:\n");
+    printDiagram(root2, 0);
+    printf("\n");
+
+    return 0;
+}
