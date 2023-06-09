@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+typedef struct TreeNode {
+    char data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
+
+TreeNode* createNode(char data) {
+    TreeNode* newNode = (TreeNode*)malloc(sizeof(TreeNode));
+    newNode->data = data;
+    newNode->left = NULL;
+    newNode->right = NULL;
+    return newNode;
+}
+
+TreeNode* createExpressionTree() {
+    // Create the tree nodes
+    TreeNode* root = createNode('-');
+    TreeNode* multNode1 = createNode('*');
+    TreeNode* multNode2 = createNode('*');
+    TreeNode* d2PsiDx2Node = createNode('d');
+    TreeNode* x2Node = createNode('x');
+    TreeNode* num1Node = createNode('1');
+    TreeNode* powNode1 = createNode('^');
+    TreeNode* v2Node = createNode('v');
+    TreeNode* d2PsiDt2Node = createNode('d');
+    TreeNode* t2Node = createNode('t');
+
+    // Connect the nodes to form the expression tree
+    root->left = multNode1;
+    root->right = multNode2;
+    multNode1->left = d2PsiDx2Node;
+    multNode1->right = powNode1;
+    multNode2->left = num1Node;
+    multNode2->right = d2PsiDt2Node;
+    d2PsiDx2Node->left = 'd';
+    d2PsiDx2Node->right = x2Node;
+    powNode1->left = v2Node;
+    powNode1->right = '2';
+    d2PsiDt2Node->left = 'd';
+    d2PsiDt2Node->right = t2Node;
+
+    return root;
+}
+
+void printTree(TreeNode* root, int space) {
+    if (root == NULL)
+        return;
+
+    space += 4;
+
+    printTree(root->right, space);
+
+    printf("\n");
+    for (int i = 4; i < space; i++)
+        printf(" ");
+    printf("%c\n", root->data);
+
+    printTree(root->left, space);
+}
+
+int main() {
+    TreeNode* root = createExpressionTree();
+
+    printf("Expression in tree form:\n");
+    printTree(root, 0);
+
+    return 0;
+}
